@@ -66,6 +66,7 @@ SITES = {
     'iwara'            : 'iwara',
     'joy'              : 'joy',
     'kankanews'        : 'bilibili',
+    'kakao'            : 'kakao',
     'khanacademy'      : 'khan',
     'ku6'              : 'ku6',
     'kuaishou'         : 'kuaishou',
@@ -79,6 +80,7 @@ SITES = {
     'metacafe'         : 'metacafe',
     'mgtv'             : 'mgtv',
     'miomio'           : 'miomio',
+    'missevan'         : 'missevan',
     'mixcloud'         : 'mixcloud',
     'mtv81'            : 'mtv81',
     'musicplayon'      : 'musicplayon',
@@ -271,15 +273,21 @@ def matchall(text, patterns):
 def launch_player(player, urls):
     import subprocess
     import shlex
+    urls = list(urls)
+    for url in urls.copy():
+        if type(url) is list:
+            urls.extend(url)
+    urls = [url for url in urls if type(url) is str]
+    assert urls
     if (sys.version_info >= (3, 3)):
         import shutil
         exefile=shlex.split(player)[0]
         if shutil.which(exefile) is not None:
-            subprocess.call(shlex.split(player) + list(urls))
+            subprocess.call(shlex.split(player) + urls)
         else:
             log.wtf('[Failed] Cannot find player "%s"' % exefile)
     else:
-        subprocess.call(shlex.split(player) + list(urls))
+        subprocess.call(shlex.split(player) + urls)
 
 
 def parse_query_param(url, param):
@@ -915,7 +923,7 @@ def get_output_filename(urls, title, ext, output_dir, merge, **kwargs):
     if kwargs.get('part', -1) >= 0:
         result = '%s[%02d]' % (result, kwargs.get('part'))
     result = '%s.%s' % (result, merged_ext)
-    return result
+    return result.replace("'", "_")
 
 def print_user_agent(faker=False):
     urllib_default_user_agent = 'Python-urllib/%d.%d' % sys.version_info[:2]
