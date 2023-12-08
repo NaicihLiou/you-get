@@ -52,20 +52,17 @@ class Imgur(VideoExtractor):
         else:
             # gallery image
             content = get_content(self.url)
-            image = json.loads(match1(content, r'image\s*:\s*({.*}),'))
-            ext = image['ext']
+            url = match1(content, r'meta property="og:video"[^>]+(https?://i.imgur.com/[^"?]+)') or \
+                match1(content, r'meta property="og:image"[^>]+(https?://i.imgur.com/[^"?]+)')
+            _, container, size = url_info(url)
             self.streams = {
                 'original': {
-                    'src': ['http://i.imgur.com/%s%s' % (image['hash'], ext)],
-                    'size': image['size'],
-                    'container': ext[1:]
-                },
-                'thumbnail': {
-                    'src': ['http://i.imgur.com/%ss%s' % (image['hash'], '.jpg')],
-                    'container': 'jpg'
+                    'src': [url],
+                    'size': size,
+                    'container': container
                 }
             }
-            self.title = image['title'] or image['hash']
+            self.title = r1(r'i\.imgur\.com/([^./]*)', url)
 
     def extract(self, **kwargs):
         if 'stream_id' in kwargs and kwargs['stream_id']:
